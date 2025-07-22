@@ -12,6 +12,9 @@ import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.time.LocalDateTime;
+
 @SpringBootApplication
 @Log4j2
 public class KafkaRequestReplyApplication {
@@ -23,16 +26,34 @@ public class KafkaRequestReplyApplication {
 		SpringApplication.run(KafkaRequestReplyApplication.class, args);
 	}
 
-	@KafkaListener(id = "server", topics = "kRequests")
+	@KafkaListener(id = "server-read", topics = "kRequests", concurrency = "4")
 	@SendTo("kReplies")
-	public String listen(String in) {
-		log.info("Server received: {}", in);
+	public String listenReads(String in) {
+		log.info("Server read received: {}", in);
 
 		String dbMessage = greetingRepo.findById(1L)
 				.map(GreetingMessage::getMessage)
 				.orElse("No greeting found in DB");
 
-		return in + " | " + dbMessage;
+		return "Input message: " + in + " | Response Message: " + dbMessage;
+	}
+
+	@KafkaListener(id = "server-write", topics = "kRequests-write", concurrency = "4")
+	@SendTo("kReplies-write")
+	public String listenWrites(String in) {
+		log.info("Server write received: {}", in);
+		GreetingMessage greeting = new GreetingMessage();
+		greeting.setMessage(in);
+		greeting.setSender("Requester Service");
+		greeting.setCreatedAt(LocalDateTime.now());
+
+		GreetingMessage save = greetingRepo.save(greeting);
+
+		String dbMessage = greetingRepo.findById(1L)
+				.map(GreetingMessage::getMessage)
+				.orElse("No greeting found in DB");
+
+		return " Message saved | id: " + save.getId();
 	}
 
 	@Bean
@@ -44,8 +65,24 @@ public class KafkaRequestReplyApplication {
 	}
 
 	@Bean
+	public NewTopic kRequestsWrite() {
+		return TopicBuilder.name("kRequests-write")
+				.partitions(2)
+				.replicas(1)
+				.build();
+	}
+
+	@Bean
 	public NewTopic kReplies() {
 		return TopicBuilder.name("kReplies")
+				.partitions(2)
+				.replicas(1)
+				.build();
+	}
+
+	@Bean
+	public NewTopic kRepliesWrite() {
+		return TopicBuilder.name("kReplies-write")
 				.partitions(2)
 				.replicas(1)
 				.build();

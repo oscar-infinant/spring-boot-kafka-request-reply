@@ -28,10 +28,12 @@ import org.springframework.kafka.requestreply.RequestReplyFuture;
 import org.springframework.kafka.support.SendResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
 @Log4j2
 @EnableKafka
+@EnableAsync
 public class KafkaRequestReplyApplication {
 	public final Map<String, CompletableFuture<String>> pendingReplies = new ConcurrentHashMap<>();
 
@@ -44,37 +46,14 @@ public class KafkaRequestReplyApplication {
 	@Value("${kafka.reply.group:repliesGroup-0}")
 	private String replyGroup;
 
+	@Value("${kafka.reply-write.group:repliesWriteGroup-0}")
+	private String replyWriteGroup;
+
 	public static void main(String[] args) {
 		SpringApplication.run(KafkaRequestReplyApplication.class, args);
 	}
 
-	/*
-	@Bean
-	public ApplicationRunner runner(ReplyingKafkaTemplate<Integer, String, String> template) {
-		return args -> {
-			while (true) {
-				try {
-					ProducerRecord<Integer, String> record = new ProducerRecord<>(
-							"kRequests",
-							"App: " + applicationName + " | Message: " + requestMessage + "-" + LocalTime.now()
-					);
-					RequestReplyFuture<Integer, String, String> replyFuture = template.sendAndReceive(record);
-					SendResult<Integer, String> sendResult = replyFuture.getSendFuture().get(10, TimeUnit.SECONDS);
-					log.info("Sent ok: {}", sendResult.getRecordMetadata());
-					ConsumerRecord<Integer, String> consumerRecord = replyFuture.get(10, TimeUnit.SECONDS);
-					log.info("Return value: {}", consumerRecord.value());
-					Thread.sleep(1000);
-				} catch (Exception ex) {
-					log.error("Something went wrong! Kafka reply timed out!", ex);
-				}
-			}
-		};
-	}
-
-	 */
-
-
-	@Bean
+	@Bean (name = "replyingReadTemplate")
 	public ReplyingKafkaTemplate<Integer, String, String> replyingTemplate(
 			ProducerFactory<Integer, String> pf,
 			ConcurrentMessageListenerContainer<Integer, String> repliesContainer) {
@@ -84,6 +63,15 @@ public class KafkaRequestReplyApplication {
 		return template;
 	}
 
+	@Bean (name = "replyingWriteTemplate")
+	public ReplyingKafkaTemplate<Integer, String, String> replyingWriteTemplate(
+			ProducerFactory<Integer, String> pf,
+			ConcurrentMessageListenerContainer<Integer, String> repliesWriteContainer) {
+
+		ReplyingKafkaTemplate<Integer, String, String> template = new ReplyingKafkaTemplate<>(pf, repliesWriteContainer);
+		template.setSharedReplyTopic(true);
+		return template;
+	}
 
 	@Bean
 	public ConcurrentMessageListenerContainer<Integer, String> repliesContainer(
@@ -93,18 +81,21 @@ public class KafkaRequestReplyApplication {
 				containerFactory.createContainer("kReplies");
 		repliesContainer.getContainerProperties().setGroupId(replyGroup); // Overrides any `group.id` property provided by the consumer factory configuration
 		repliesContainer.setAutoStartup(false);
+		repliesContainer.setConcurrency(4); //
 		return repliesContainer;
 	}
 
-	/*
-	@KafkaListener(id="server", topics = "kReplies")
-	public void listenReply(ConsumerRecord<String, String> record) {
-		String corrId = record.key();
-		CompletableFuture<String> future = pendingReplies.remove(corrId);
-		if (future != null) {
-			future.complete(record.value());
-		}
-	}*/
+	@Bean
+	public ConcurrentMessageListenerContainer<Integer, String> repliesWriteContainer(
+			ConcurrentKafkaListenerContainerFactory<Integer, String> containerFactory) {
+
+		ConcurrentMessageListenerContainer<Integer, String> repliesContainer =
+				containerFactory.createContainer("kReplies-write");
+		repliesContainer.getContainerProperties().setGroupId(replyWriteGroup); // Overrides any `group.id` property provided by the consumer factory configuration
+		repliesContainer.setAutoStartup(false);
+		repliesContainer.setConcurrency(4); //
+		return repliesContainer;
+	}
 
 	@Bean
 	public NewTopic kRequests() {

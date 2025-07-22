@@ -25,37 +25,45 @@ import java.util.concurrent.TimeoutException;
 @RequestMapping("/api")
 public class RequestController {
     private static final Logger log = LogManager.getLogger(RequestController.class);
+
     @Autowired
-    private ReplyingKafkaTemplate<Integer, String, String> template;
+    @Qualifier("replyingReadTemplate")
+    private ReplyingKafkaTemplate<Integer, String, String> templateRead;
+
+    @Autowired
+    @Qualifier("replyingWriteTemplate")
+    private ReplyingKafkaTemplate<Integer, String, String> templateWrite;
 
     @Autowired
     private KafkaRequestReplyApplication app; // contiene pendingReplies
 
     @PostMapping("/send")
-    public ResponseEntity<String> sendMessage(@RequestBody String message) {
+    public CompletableFuture<ResponseEntity<String>> sendMessage(@RequestBody String message) {
         log.info("Post Request received: {}", message);
-        try {
-            // Construir el ProducerRecord con topic y payload
-            ProducerRecord<Integer, String> record = new ProducerRecord<>(
-                    "kRequests",
-                    "App: " + "RequesterApp " + " | Message: " + message + "-" + LocalTime.now()
-            );
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                ProducerRecord<Integer, String> record = new ProducerRecord<>("kRequests-write", message);
+                RequestReplyFuture<Integer, String, String> future = templateWrite.sendAndReceive(record);
+                ConsumerRecord<Integer, String> response = future.get(10, TimeUnit.SECONDS);
+                return ResponseEntity.ok(response.value());
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Kafka failed");
+            }
+        });
+    }
 
-            // (opcional) añadir headers si deseas trazabilidad
-            record.headers().add(new RecordHeader("requestId", UUID.randomUUID().toString().getBytes()));
-
-            // Enviar y esperar respuesta
-            RequestReplyFuture<Integer, String, String> future = template.sendAndReceive(record);
-
-            // Obtener la respuesta con timeout
-            ConsumerRecord<Integer, String> response = future.get(10, TimeUnit.SECONDS);
-
-            return ResponseEntity.ok(response.value());
-
-        } catch (TimeoutException e) {
-            return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body("Kafka reply timed out");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Kafka send/receive failed");
-        }
+    @GetMapping("/send")
+    public CompletableFuture<ResponseEntity<String>> getMessage(@RequestBody String message) {
+        log.info("Get Request received: {}", message);
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                ProducerRecord<Integer, String> record = new ProducerRecord<>("kRequests", message);
+                RequestReplyFuture<Integer, String, String> future = templateRead.sendAndReceive(record);
+                ConsumerRecord<Integer, String> response = future.get(10, TimeUnit.SECONDS);
+                return ResponseEntity.ok(response.value());
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Kafka failed");
+            }
+        });
     }
 }
