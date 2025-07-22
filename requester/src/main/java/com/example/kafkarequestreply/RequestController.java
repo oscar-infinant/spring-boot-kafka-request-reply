@@ -53,11 +53,11 @@ public class RequestController {
     }
 
     @GetMapping("/send")
-    public CompletableFuture<ResponseEntity<String>> getMessage(@RequestBody String message) {
-        log.info("Get Request received: {}", message);
+    public CompletableFuture<ResponseEntity<String>> getMessage(@RequestBody String messageId) {
+        log.info("Get Request received: {}", messageId);
         return CompletableFuture.supplyAsync(() -> {
             try {
-                ProducerRecord<Integer, String> record = new ProducerRecord<>("kRequests", message);
+                ProducerRecord<Integer, String> record = new ProducerRecord<>("kRequests", messageId);
                 RequestReplyFuture<Integer, String, String> future = templateRead.sendAndReceive(record);
                 ConsumerRecord<Integer, String> response = future.get(10, TimeUnit.SECONDS);
                 return ResponseEntity.ok(response.value());

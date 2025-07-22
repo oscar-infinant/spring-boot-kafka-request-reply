@@ -28,14 +28,14 @@ public class KafkaRequestReplyApplication {
 
 	@KafkaListener(id = "server-read", topics = "kRequests", concurrency = "4")
 	@SendTo("kReplies")
-	public String listenReads(String in) {
+	public String listenReads(Long in) {
 		log.info("Server read received: {}", in);
 
-		String dbMessage = greetingRepo.findById(1L)
+		String dbMessage = greetingRepo.findById(in)
 				.map(GreetingMessage::getMessage)
 				.orElse("No greeting found in DB");
 
-		return "Input message: " + in + " | Response Message: " + dbMessage;
+		return "Response Message: " + dbMessage;
 	}
 
 	@KafkaListener(id = "server-write", topics = "kRequests-write", concurrency = "4")
