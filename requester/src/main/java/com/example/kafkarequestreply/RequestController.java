@@ -52,8 +52,8 @@ public class RequestController {
         });
     }
 
-    @GetMapping("/send")
-    public CompletableFuture<ResponseEntity<String>> getMessage(@RequestBody String messageId) {
+    @GetMapping("/send/{messageId}")
+    public CompletableFuture<ResponseEntity<String>> getMessage(@PathVariable String messageId) {
         log.info("Get Request received: {}", messageId);
         return CompletableFuture.supplyAsync(() -> {
             try {
