@@ -1,5 +1,7 @@
 package com.example.kafkarequestreply;
+
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -7,7 +9,7 @@ import java.time.LocalDateTime;
 public class GreetingMessage {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // PostgreSQL: requiere IDENTITY o SERIAL en BD
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, length = 255)
@@ -19,17 +21,14 @@ public class GreetingMessage {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    // Constructor vacío para JPA
     public GreetingMessage() {}
 
-    // Constructor con parámetros útiles
     public GreetingMessage(String message, String sender) {
         this.message = message;
         this.sender = sender;
         this.createdAt = LocalDateTime.now();
     }
 
-    // Getters & Setters
     public Long getId() {
         return id;
     }
