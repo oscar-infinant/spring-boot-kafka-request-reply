@@ -1,4 +1,4 @@
-## Technical Overview
+# Technical Overview
 This application implements an asynchronous request-response architecture using Spring Boot and Apache Kafka.
 
 The <b>frontend service</b>, built with Spring Boot, exposes a non-blocking HTTP API powered by NIO. The RestController provides two main endpoints:
@@ -16,7 +16,7 @@ The <b>backend service</b>, built with Spring Boot. This application listens to 
 
 To _maximize parallelism and throughput_, both Kafka listener methods use CompletableFuture.supplyAsync, enabling multi-threaded, asynchronous processing without blocking the Kafka consumer threads.
 
-## Software Requirements
+# Software Requirements
 - Kafka server (*)
 - Postgres DB (*)
 - Postman (Only to test endpoints)
@@ -24,17 +24,17 @@ To _maximize parallelism and throughput_, both Kafka listener methods use Comple
 
 (*) _Required_
 
-## Postman Collection
+# Postman Collection
 Import the `ReqReply.postman_collection.json` located in the root folder and import it into Postman for testing.
 
-## K6 Scripts
+# K6 Scripts
 Under k6 folder can be found scripts to conduct load test locally.
 - k6/get-message-req-reply.js
 - k6/write-message-req-reply.js
 
-## Replier
+# Replier
 
-### Database DDL & DML
+## Database DDL & DML
 ```
 DROP TABLE IF EXISTS greeting_message;
 code

@@ -25,8 +25,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @EnableKafka
 @EnableAsync
 public class KafkaRequestReplyApplication {
-	public final Map<String, CompletableFuture<String>> pendingReplies = new ConcurrentHashMap<>();
-
 	private static final Logger log = LogManager.getLogger(KafkaRequestReplyApplication.class);
 
 	@Value("${spring.application.name}")
