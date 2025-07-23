@@ -94,26 +94,6 @@ public class KafkaRequestReplyApplication {
 	}
 
 	@Bean
-	public ConcurrentKafkaListenerContainerFactory<Integer, Long> longKafkaListenerContainerFactory(
-			ConsumerFactory<Integer, Long> longConsumerFactory) {
-		ConcurrentKafkaListenerContainerFactory<Integer, Long> factory =
-				new ConcurrentKafkaListenerContainerFactory<>();
-		factory.setConsumerFactory(longConsumerFactory);
-		factory.setCommonErrorHandler(new DefaultErrorHandler(new FixedBackOff(1000L, 3)));
-		return factory;
-	}
-
-	@Bean
-	public ConsumerFactory<Integer, Long> longConsumerFactory() {
-		Map<String, Object> props = new HashMap<>();
-		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092");
-		props.put(ConsumerConfig.GROUP_ID_CONFIG, "reply-group");
-		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, IntegerDeserializer.class);
-		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
-		return new DefaultKafkaConsumerFactory<>(props);
-	}
-
-	@Bean
 	public ConcurrentMessageListenerContainer<Integer, String> repliesWriteContainer(
 			ConcurrentKafkaListenerContainerFactory<Integer, String> containerFactory) {
 
@@ -123,15 +103,6 @@ public class KafkaRequestReplyApplication {
 		repliesContainer.setAutoStartup(false);
 		repliesContainer.setConcurrency(4); //
 		return repliesContainer;
-	}
-
-	@Bean
-	public ProducerFactory<Integer, Long> longProducerFactory() {
-		Map<String, Object> props = new HashMap<>();
-		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092");
-		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class);
-		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
-		return new DefaultKafkaProducerFactory<>(props);
 	}
 
 	@Bean
