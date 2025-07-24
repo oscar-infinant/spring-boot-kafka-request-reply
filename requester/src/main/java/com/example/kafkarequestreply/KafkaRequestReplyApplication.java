@@ -82,7 +82,7 @@ public class KafkaRequestReplyApplication {
 				containerFactory.createContainer("kReplies");
 		repliesContainer.getContainerProperties().setGroupId(replyGroup); // Overrides any `group.id` property provided by the consumer factory configuration
 		repliesContainer.setAutoStartup(false);
-		repliesContainer.setConcurrency(4); //
+		//repliesContainer.setConcurrency(4); //
 		return repliesContainer;
 	}
 
@@ -94,14 +94,14 @@ public class KafkaRequestReplyApplication {
 				containerFactory.createContainer("kReplies-write");
 		repliesContainer.getContainerProperties().setGroupId(replyWriteGroup);
 		repliesContainer.setAutoStartup(false);
-		repliesContainer.setConcurrency(4); //
+		//repliesContainer.setConcurrency(4); //
 		return repliesContainer;
 	}
 
 	@Bean
 	public NewTopic kRequests() {
 		return TopicBuilder.name("kRequests")
-				.partitions(2)
+				//.partitions(2)
 				.replicas(1)
 				.build();
 	}
@@ -109,7 +109,7 @@ public class KafkaRequestReplyApplication {
 	@Bean
 	public NewTopic kReplies() {
 		return TopicBuilder.name("kReplies")
-				.partitions(2)
+				//.partitions(2)
 				.replicas(1)
 				.build();
 	}

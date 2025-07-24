@@ -22,8 +22,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 @Component
-public class ReactiveWriteHandler {
-    private static final Logger log = LogManager.getLogger(ReactiveWriteHandler.class);
+public class ReactiveHandler {
+    private static final Logger log = LogManager.getLogger(ReactiveHandler.class);
 
     @Autowired
     @Qualifier("reactiveRequestWriteReceiver")
@@ -107,7 +107,7 @@ public class ReactiveWriteHandler {
     @Bean
     public NewTopic kRequestsWriteReactive() {
         return TopicBuilder.name("kRequests-write-reactive")
-                .partitions(2)
+                //.partitions(2)
                 .replicas(1)
                 .build();
     }
@@ -115,7 +115,7 @@ public class ReactiveWriteHandler {
     @Bean
     public NewTopic kRequestsReadReactive() {
         return TopicBuilder.name("kRequests-read-reactive")
-                .partitions(2)
+                //.partitions(2)
                 .replicas(1)
                 .build();
     }
@@ -123,7 +123,7 @@ public class ReactiveWriteHandler {
     @Bean
     public NewTopic kRepliesReactive() {
         return TopicBuilder.name("kReplies-reactive")
-                .partitions(2)
+                //.partitions(2)
                 .replicas(1)
                 .build();
     }

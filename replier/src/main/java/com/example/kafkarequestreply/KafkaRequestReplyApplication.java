@@ -38,7 +38,7 @@ public class KafkaRequestReplyApplication {
 
 	/******* Begin: Multi threaded message processing implementation ******/
 
-	@KafkaListener(id = "server-read", topics = "kRequests", concurrency = "4")
+	@KafkaListener(id = "server-read", topics = "kRequests", concurrency = "1")
 	public void listenReads(Long in, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlationId,
 							@Header(KafkaHeaders.REPLY_TOPIC) byte[] replyTo) {
 		log.info("KafkaHeaders.REPLY_TOPIC {}", replyTo);
@@ -62,7 +62,7 @@ public class KafkaRequestReplyApplication {
 		});
 	}
 
-	@KafkaListener(id = "server-write", topics = "kRequests-write", concurrency = "4")
+	@KafkaListener(id = "server-write", topics = "kRequests-write", concurrency = "1")
 	public void listenWrites(String in,
 							 @Header(KafkaHeaders.CORRELATION_ID) byte[] correlationId,
 							 @Header(KafkaHeaders.REPLY_TOPIC) byte[] replyTo) {
@@ -99,7 +99,7 @@ public class KafkaRequestReplyApplication {
 
 	/*
 
-	@KafkaListener(id = "server-read", topics = "kRequests", concurrency = "4")
+	@KafkaListener(id = "server-read", topics = "kRequests", concurrency = "1")
 	@SendTo("kReplies")
 	public String listenReads(Long in) {
 		log.info("Server read received: {}", in);
@@ -113,7 +113,7 @@ public class KafkaRequestReplyApplication {
 	*/
 
 	/*
-	@KafkaListener(id = "server-write", topics = "kRequests-write", concurrency = "4")
+	@KafkaListener(id = "server-write", topics = "kRequests-write", concurrency = "1")
 	@SendTo("kReplies-write")
 	public String listenWrites(String in) {
 		log.info("Server write received: {}", in);
@@ -137,7 +137,7 @@ public class KafkaRequestReplyApplication {
 	@Bean
 	public NewTopic kRequests() {
 		return TopicBuilder.name("kRequests")
-				.partitions(2)
+				//.partitions(2)
 				.replicas(1)
 				.build();
 	}
@@ -145,7 +145,7 @@ public class KafkaRequestReplyApplication {
 	@Bean
 	public NewTopic kRequestsWrite() {
 		return TopicBuilder.name("kRequests-write")
-				.partitions(2)
+				//.partitions(2)
 				.replicas(1)
 				.build();
 	}
@@ -153,7 +153,7 @@ public class KafkaRequestReplyApplication {
 	@Bean
 	public NewTopic kReplies() {
 		return TopicBuilder.name("kReplies")
-				.partitions(2)
+				//.partitions(2)
 				.replicas(1)
 				.build();
 	}
@@ -161,7 +161,7 @@ public class KafkaRequestReplyApplication {
 	@Bean
 	public NewTopic kRepliesWrite() {
 		return TopicBuilder.name("kReplies-write")
-				.partitions(2)
+				//.partitions(2)
 				.replicas(1)
 				.build();
 	}
