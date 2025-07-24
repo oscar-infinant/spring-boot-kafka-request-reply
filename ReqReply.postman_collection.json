@@ -7,13 +7,78 @@
 	},
 	"item": [
 		{
-			"name": "GET Message - Requestor",
+			"name": "GET Message - Non Reactive Requestor",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8090/api/send/62099",
+					"host": [
+						"localhost"
+					],
+					"port": "8090",
+					"path": [
+						"api",
+						"send",
+						"62099"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET Message - Reactive Requestor",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8090/api/reactive/send/6203",
+					"host": [
+						"localhost"
+					],
+					"port": "8090",
+					"path": [
+						"api",
+						"reactive",
+						"send",
+						"6203"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST Message - Non Reactive Requestor",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "hola",
+					"raw": "Non Reactive request x4",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -35,13 +100,13 @@
 			"response": []
 		},
 		{
-			"name": "POST Message - Requestor",
+			"name": "POST Message - Reactive Requestor",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "hola",
+					"raw": "Reactive request x6",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -49,13 +114,14 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:8090/api/send",
+					"raw": "localhost:8090/api/reactive/send",
 					"host": [
 						"localhost"
 					],
 					"port": "8090",
 					"path": [
 						"api",
+						"reactive",
 						"send"
 					]
 				}

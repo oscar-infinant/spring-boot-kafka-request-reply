@@ -34,6 +34,8 @@ public class KafkaRequestReplyApplication {
 		SpringApplication.run(KafkaRequestReplyApplication.class, args);
 	}
 
+
+
 	/******* Begin: Multi threaded message processing implementation ******/
 
 	@KafkaListener(id = "server-read", topics = "kRequests", concurrency = "4")
@@ -163,11 +165,4 @@ public class KafkaRequestReplyApplication {
 				.replicas(1)
 				.build();
 	}
-
-	/*@Bean // not required if Jackson is on the classpath
-	public MessagingMessageConverter simpleMapperConverter() {
-		MessagingMessageConverter messagingMessageConverter = new MessagingMessageConverter();
-		messagingMessageConverter.setHeaderMapper(new SimpleKafkaHeaderMapper());
-		return messagingMessageConverter;
-	}*/
 }
